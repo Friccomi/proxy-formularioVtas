@@ -3,18 +3,34 @@ import requests
 
 app = Flask(__name__)
 
-# Dirección del Apps Script que recibe el POST
-GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxAYEoskZUGluDMxhfhCIqsTy_r-QQFarZGK7rB_2FH6YZWEG68vAIM_5jkVJIu7aGE/exec"
+GAS_ENDPOINT = "https://script.google.com/macros/s/AKfycbzLaevARS5S3sX-6ZzZCdxXrIRdxyjPj0uOY1unAqtuoGyQNZe1_u9uDTxjbWcAo3wn/exec"  # tu URL real
 
-@app.route("/enviar", methods=["POST"])
-def reenviar_datos():
+@app.route('/proxy', methods=['POST', 'OPTIONS'])
+def proxy():
+    if request.method == 'OPTIONS':
+        # CORS preflight
+        response = app.make_default_options_response()
+        headers = response.headers
+        headers['Access-Control-Allow-Origin'] = '*'
+        headers['Access-Control-Allow-Headers'] = 'Content-Type'
+        headers['Access-Control-Allow-Methods'] = 'POST, OPTIONS'
+        return response
+
+    data = request.get_json()
     try:
-        # Reenvía el JSON recibido al Apps Script
-        response = requests.post(GOOGLE_SCRIPT_URL, json=request.json)
-
-        # Devuelve el contenido tal como vino de Google
-        return (response.text, response.status_code, {'Content-Type': 'application/json'})
+        r = requests.post(GAS_ENDPOINT, json=data)
+        r.raise_for_status()
+        return jsonify(ok=True, response=r.text)
     except Exception as e:
-        return jsonify({"success": False, "error": str(e)}), 500
+        import traceback
+        traceback.print_exc()  # Esto imprime el stack trace completo
+        return jsonify(ok=False, error=str(e)), 500
 
+# CORS global (opcional)
+@app.after_request
+def add_cors_headers(response):
+    response.headers["Access-Control-Allow-Origin"] = "*"
+    return response
 
+if __name__ == '__main__':
+    app.run(port=5000)
