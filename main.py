@@ -3,7 +3,7 @@ import requests
 
 app = Flask(__name__)
 
-GAS_ENDPOINT = "https://script.google.com/macros/s/AKfycbxoV0yn43kxsJpDZbyGa7wgc0MPmVEzi5lf1gfe3wA_evstCRtgXdv6ks9ICsywu_bz/exec"   # tu URL real
+GAS_ENDPOINT = "https://script.google.com/macros/s/AKfycbx7ble1dZSrBFkTMQkK-2q7knNH8BC60N_7x2ETr6JDmzcA8HLSENyzjJ3W2iyl0eJG/exec"   # tu URL real
 @app.route('/proxy', methods=['POST', 'OPTIONS'])
 def proxy():
     if request.method == 'OPTIONS':
